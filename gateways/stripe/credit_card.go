@@ -6,25 +6,46 @@ import (
 	"github.com/qor/gomerchant"
 	stripe "github.com/stripe/stripe-go"
 	"github.com/stripe/stripe-go/card"
+	"github.com/stripe/stripe-go/token"
 )
 
+// CreateCreditCard creates a credit card using a token
 func (*Stripe) CreateCreditCard(creditCardParams gomerchant.CreateCreditCardParams) (gomerchant.CreditCardResponse, error) {
 	var (
 		expMonth = fmt.Sprint(creditCardParams.CreditCard.ExpMonth)
 		expYear  = fmt.Sprint(creditCardParams.CreditCard.ExpYear)
 	)
 
-	c, err := card.New(&stripe.CardParams{
+	// Create a token for the card
+	cp := &stripe.CardParams{
 		Customer: &creditCardParams.CustomerID,
 		Name:     &creditCardParams.CreditCard.Name,
 		Number:   &creditCardParams.CreditCard.Number,
 		ExpMonth: &expMonth,
 		ExpYear:  &expYear,
 		CVC:      &creditCardParams.CreditCard.CVC,
+	}
+
+	params := &stripe.TokenParams{
+		Card:     cp,
+		Customer: &creditCardParams.CustomerID,
+	}
+
+	t, err := token.New(params)
+	if err != nil {
+		return gomerchant.CreditCardResponse{}, err
+	}
+
+	c, err := card.New(&stripe.CardParams{
+		Customer: stripe.String(creditCardParams.CustomerID),
+		Token:    &t.ID,
 	})
 
-	resp := gomerchant.CreditCardResponse{CreditCardID: c.ID}
+	if err != nil {
+		return gomerchant.CreditCardResponse{}, err
+	}
 
+	resp := gomerchant.CreditCardResponse{CreditCardID: c.ID}
 	if c.Customer != nil {
 		resp.CustomerID = c.Customer.ID
 	}
@@ -32,6 +53,7 @@ func (*Stripe) CreateCreditCard(creditCardParams gomerchant.CreateCreditCardPara
 	return resp, err
 }
 
+// GetCreditCard retrieves  stored credit card
 func (*Stripe) GetCreditCard(creditCardParams gomerchant.GetCreditCardParams) (gomerchant.GetCreditCardResponse, error) {
 	c, err := card.Get(creditCardParams.CreditCardID, &stripe.CardParams{Customer: &creditCardParams.CustomerID})
 

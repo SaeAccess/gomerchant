@@ -47,7 +47,7 @@ func (testSuite TestSuite) TestCreateCreditCard(t *testing.T) {
 
 func (testSuite TestSuite) TestAuthorizeAndCapture(t *testing.T) {
 	authorizeResult, err := testSuite.Gateway.Authorize(100, gomerchant.AuthorizeParams{
-		Currency: "JPY",
+		Currency: "USD",
 		OrderID:  fmt.Sprint(time.Now().Unix()),
 		PaymentMethod: &gomerchant.PaymentMethod{
 			CreditCard: &gomerchant.CreditCard{
@@ -73,7 +73,7 @@ func (testSuite TestSuite) TestAuthorizeAndCapture(t *testing.T) {
 func (testSuite TestSuite) TestAuthorizeAndCaptureWithSavedCreditCard(t *testing.T) {
 	if savedCreditCard, err := testSuite.createSavedCreditCard(); err == nil {
 		authorizeResult, err := testSuite.Gateway.Authorize(100, gomerchant.AuthorizeParams{
-			Currency: "JPY",
+			Currency: "USD",
 			OrderID:  fmt.Sprint(time.Now().Unix()),
 			PaymentMethod: &gomerchant.PaymentMethod{
 				SavedCreditCard: &gomerchant.SavedCreditCard{
