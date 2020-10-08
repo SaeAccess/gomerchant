@@ -58,6 +58,10 @@ func (*Stripe) Authorize(amount uint64, params gomerchant.AuthorizeParams) (gome
 				return gomerchant.AuthorizeResponse{}, err
 			}
 
+			if params.DebitOnly && t.Card.Funding != "debit" {
+				return gomerchant.AuthorizeResponse{}, fmt.Errorf("Only debit card transactions supported")
+			}
+
 			source := stripe.SourceParams{
 				Token: &t.ID,
 			}

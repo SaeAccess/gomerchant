@@ -23,6 +23,7 @@ type AuthorizeParams struct {
 	BillingAddress  *Address
 	ShippingAddress *Address
 	PaymentMethod   *PaymentMethod
+	DebitOnly       bool
 	Params
 }
 
